@@ -9,6 +9,45 @@ DriveMesh adalah aplikasi self-hosted yang menghubungkan Google Drive ke Windows
 
 > **Status proyek:** Periksa keamanan, kompatibilitas, dan pemulihan data di lingkungan Anda sebelum menggunakannya untuk file penting. Proyek ini belum menjalani audit keamanan independen.
 
+## Coba DriveMesh langsung
+
+Anda dapat mencoba instance publik di **[drivemesh.farhan-dev.my.id](https://drivemesh.farhan-dev.my.id/)** tanpa memasang server sendiri.
+
+1. Buka situs tersebut, pilih **Buat akun**, lalu daftar dengan username dan password DriveMesh. Jika sudah memiliki akun, pilih **Masuk**.
+2. Di dashboard, pilih **Hubungkan Google Drive**, masuk ke akun Google yang ingin digunakan, lalu berikan izin yang diminta. Ulangi langkah ini untuk menghubungkan akun Google lain.
+3. Pastikan Drive muncul sebagai **Siap** di dashboard. Setiap akun Google yang terhubung akan muncul sebagai folder tersendiri di share Anda.
+4. Sambungkan perangkat dengan username dan password **DriveMesh** yang sama dengan akun web Anda:
+
+   **Windows File Explorer**
+
+   - Buka File Explorer dan masukkan alamat berikut di bilah alamat:
+
+     ```text
+     \\drivemesh.farhan-dev.my.id
+     ```
+
+   - Pilih **DriveMesh** dari daftar. Saat diminta, masukkan username dan password DriveMesh.
+
+   **macOS Finder**
+
+   - Di Finder pilih **Go → Connect to Server** atau tekan `⌘K`, lalu masukkan:
+
+     ```text
+     smb://drivemesh.farhan-dev.my.id
+     ```
+
+   - Pilih **Registered User**, masuk dengan username dan password DriveMesh, lalu pilih **DriveMesh**.
+
+   **iPhone dan iPad**
+
+   - Di aplikasi Files, pilih **Browse → Connect to Server**, masukkan `smb://drivemesh.farhan-dev.my.id`, masuk sebagai **Registered User**, lalu pilih **DriveMesh**.
+
+5. Buka folder Google Drive yang ingin digunakan; buat folder atau simpan file **di dalamnya**. File yang ditulis dapat diunggah ke Google Drive di latar belakang, jadi periksa bahwa unggahan sudah selesai di Google Drive.
+
+Akses SMB memerlukan koneksi ke TCP port 445; sebagian jaringan atau ISP memblokir port tersebut. Akses Google juga bergantung pada status izin dan verifikasi aplikasi Google. Untuk penjelasan pemrosesan dan penyimpanan data pada instance publik, baca [Privacy Policy](https://drivemesh.farhan-dev.my.id/privacy) dan [Terms of Service](https://drivemesh.farhan-dev.my.id/terms).
+
+Ingin menjalankan instance sendiri? Ikuti bagian [Prasyarat](#prasyarat) dan [Instalasi](#instalasi) di bawah.
+
 ## Fitur
 
 - Akun dan sesi web terpisah, dengan dashboard berbahasa Indonesia dan Inggris.
