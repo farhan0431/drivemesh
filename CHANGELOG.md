@@ -4,7 +4,11 @@ Perubahan penting proyek dicatat di sini. Bagian **Unreleased** mencatat perubah
 
 ## Unreleased
 
-Belum ada perubahan yang dicatat.
+### Documentation
+
+- Added third-party license notices for rclone, Samba, application dependencies, and externally loaded fonts.
+
+No other changes are recorded.
 
 ## 0.0.1 — 2026-10-29
 

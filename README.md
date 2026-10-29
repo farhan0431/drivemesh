@@ -150,6 +150,6 @@ TEST_DATABASE_URL=postgresql://user:password@localhost:5432/drivemesh_test \
 
 These tests mock Google and the Samba gateway. Changes to SMB or FUSE still need testing on Linux with real clients. See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution process.
 
-## License
+## License and acknowledgements
 
-DriveMesh is available under the [MIT License](LICENSE). Third-party names and trademarks belong to their respective owners.
+DriveMesh's original code is available under the [MIT License](LICENSE). rclone mounts Google Drive in the server and is distributed under MIT; its copyright and license notice is in [LICENSES/RCLONE.txt](LICENSES/RCLONE.txt). The server also uses Samba and third-party JavaScript packages, fonts, and other software. See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for components, versions, and license details. Third-party names and trademarks belong to their respective owners.
