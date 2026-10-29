@@ -33,8 +33,9 @@ export class OAuthTokenModel {
         user_name = EXCLUDED.user_name,
         user_picture = EXCLUDED.user_picture,
         updated_at = NOW()
+      WHERE oauth_tokens.user_email = EXCLUDED.user_email
     `;
-    await pool.query(query, [
+    const result = await pool.query(query, [
       token.provider,
       token.access_token,
       token.refresh_token_enc,
@@ -45,6 +46,7 @@ export class OAuthTokenModel {
       token.user_name,
       token.user_picture,
     ]);
+    if (result.rowCount !== 1) throw new Error('Akun Google lain sudah terhubung');
   }
 
   static async deleteByProvider(provider = 'google'): Promise<void> {

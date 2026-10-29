@@ -10,7 +10,8 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         PORT: 5080,
-        DATABASE_URL: 'postgresql://drivemesh:drivemesh_secure_pass@localhost:5434/drivemesh',
+        DATABASE_URL: process.env.DATABASE_URL,
+        LISTEN_HOST: '127.0.0.1',
       },
     },
     {

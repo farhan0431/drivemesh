@@ -1,9 +1,9 @@
 <template>
-  <div class="bg-zinc-900/90 border border-zinc-800 rounded-xl p-5 shadow-sm">
+  <div class="workspace-panel bg-zinc-900/90 border border-zinc-800 rounded-xl p-5 shadow-sm">
     <div class="flex items-center justify-between mb-4">
       <div class="flex items-center gap-2.5">
         <div class="w-6 h-6 rounded bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-300">
-          G
+          01
         </div>
         <h2 class="text-sm font-semibold text-zinc-100">1. Otorisasi Akun Google Drive</h2>
       </div>
@@ -57,7 +57,7 @@
         </div>
         <div class="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
           <div
-            class="bg-blue-500 h-full rounded-full transition-all duration-500"
+            class="bg-blue-500 h-full rounded-full "
             :style="{ width: `${Math.min(quota.usagePercent, 100)}%` }"
           />
         </div>

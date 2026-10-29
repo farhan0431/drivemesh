@@ -8,8 +8,10 @@ dotenv.config();
 export const config = {
   env: process.env.NODE_ENV || 'production',
   port: parseInt(process.env.PORT || '5080', 10),
+  listenHost: process.env.LISTEN_HOST || '127.0.0.1',
   domain: process.env.DOMAIN || 'drivemesh.farhan-dev.my.id',
   protocol: process.env.NODE_ENV === 'development' ? 'http' : 'https',
+  smbHost: process.env.SMB_HOST || (process.env.DOMAIN || 'localhost').split(':')[0],
   
   // Google OAuth2
   googleClientId: process.env.GOOGLE_CLIENT_ID || '',
@@ -19,12 +21,12 @@ export const config = {
   },
 
   // Security Master Key (AES-256-GCM)
-  masterKey: process.env.MASTER_KEY || 'drivemesh-enterprise-vault-secure-master-key-32b!',
+  masterKey: process.env.MASTER_KEY || '',
 
   // PostgreSQL Connection String
-  databaseUrl: process.env.DATABASE_URL || 'postgresql://drivemesh:drivemesh_secure_pass@localhost:5434/drivemesh',
+  databaseUrl: process.env.DATABASE_URL || '',
 
   // Mount & Share
-  mountPoint: process.env.MOUNT_POINT || '/mnt/drivemesh/gdrive',
+  mountPoint: process.env.MOUNT_POINT || '/mnt/drivemesh/users',
   sambaShareName: process.env.SAMBA_SHARE_NAME || 'gdrive',
 };

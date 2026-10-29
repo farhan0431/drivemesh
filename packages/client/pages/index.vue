@@ -1,69 +1,9 @@
 <template>
-  <div class="space-y-6">
-    <!-- Hero Notice -->
-    <div class="bg-blue-950/20 border border-blue-900/40 rounded-xl p-4 flex items-start gap-3 text-xs text-blue-200">
-      <div class="w-5 h-5 rounded-full bg-blue-900/60 flex items-center justify-center shrink-0 text-blue-300 font-bold">
-        i
-      </div>
-      <div>
-        <p class="font-medium text-blue-100">Stateless Streaming Gateway (Zero Local Storage)</p>
-        <p class="text-blue-300/80 mt-0.5">
-          Server ini hanya mengalirkan data on-the-fly dari Google Drive Anda ke iPhone, Mac, atau Windows. File Anda 100% aman tersimpan di cloud Google.
-        </p>
-      </div>
-    </div>
-
-    <!-- 1. Google OAuth Card -->
-    <GoogleAuthCard
-      :connected="authData.connected"
-      :email="authData.email"
-      :name="authData.name"
-      :picture="authData.picture"
-      :quota="authData.quota"
-      @connect="connectGoogle"
-      @disconnect="disconnectGoogle"
-    />
-
-    <!-- 2. Network Credentials Card -->
-    <CredentialsCard
-      :initial-username="credentials.username"
-      :has-password="credentials.hasPassword"
-      :saving="savingCredentials"
-      :success-msg="credentialsMsg"
-      @save="onSaveCredentials"
-    />
-
-    <!-- 3. Device Connection Tabs -->
-    <DeviceTabs
-      :smb-url="credentials.smbUrl"
-      :windows-path="credentials.windowsPath"
-      :username="credentials.username"
-    />
-  </div>
+  <section class="landing">
+    <div class="landing-copy"><h1>{{ t('Semua Drive Anda, terasa dekat.', 'All your drives, close at hand.') }}</h1><p class="intro-copy">{{ t('Hubungkan Google Drive ke Finder, Explorer, dan perangkat Anda.', 'Connect Google Drive to Finder, Explorer, and your devices.') }}</p><div class="hero-actions"><NuxtLink class="primary-link" to="/register">{{ t('Buat akun', 'Create account') }}</NuxtLink><NuxtLink class="quiet-link" to="/login">{{ t('Sudah punya akun? Masuk', 'Already have an account? Sign in') }}</NuxtLink></div></div>
+    <div class="landing-object" :aria-label="t('Cara kerja DriveMesh', 'How DriveMesh works')"><div class="object-title">DriveMesh <span>{{ t('Ruang file Anda', 'Your file space') }}</span></div><div class="object-row"><span>01</span><strong>{{ t('Buat akun', 'Create an account') }}</strong><span>Username & password</span></div><div class="object-row"><span>02</span><strong>{{ t('Hubungkan Drive', 'Connect your drives') }}</strong><span>{{ t('Satu atau lebih akun Google', 'One or more Google accounts') }}</span></div><div class="object-row"><span>03</span><strong>{{ t('Buka di perangkat', 'Open on your devices') }}</strong><span>{{ t('Finder, Explorer, atau Files', 'Finder, Explorer, or Files') }}</span></div></div>
+  </section>
+  <section class="landing-bottom"><h2>{{ t('Satu tempat untuk Drive Anda.', 'One place for your drives.') }}</h2><p>{{ t('Masuk ke DriveMesh, hubungkan akun Google, lalu akses folder Drive melalui file sharing di perangkat Anda.', 'Sign in to DriveMesh, connect your Google accounts, and access Drive folders through file sharing on your devices.') }}</p></section>
 </template>
 
-<script setup lang="ts">
-import { onMounted } from 'vue';
-import GoogleAuthCard from '~/components/auth/GoogleAuthCard.vue';
-import CredentialsCard from '~/components/credentials/CredentialsCard.vue';
-import DeviceTabs from '~/components/devices/DeviceTabs.vue';
-import { useGoogleAuth } from '~/composables/useGoogleAuth';
-import { useCredentials } from '~/composables/useCredentials';
-
-const { authData, fetchStatus: fetchAuth, connectGoogle, disconnectGoogle } = useGoogleAuth();
-const {
-  credentials,
-  saving: savingCredentials,
-  message: credentialsMsg,
-  fetchCredentials,
-  saveCredentials,
-} = useCredentials();
-
-const onSaveCredentials = async ({ username, password }: { username: string; password?: string }) => {
-  await saveCredentials(username, password);
-};
-
-onMounted(async () => {
-  await Promise.all([fetchAuth(), fetchCredentials()]);
-});
-</script>
+<script setup lang="ts">const { t } = useLanguage();</script>

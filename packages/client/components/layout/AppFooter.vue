@@ -1,8 +1,2 @@
-<template>
-  <footer class="border-t border-zinc-900 py-6 text-center text-xs text-zinc-500 font-mono">
-    <div class="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-      <p>DriveMesh &bull; Stateless Streaming Bridge (Zero Local Storage)</p>
-      <p class="text-zinc-600">Open-Source Edition &bull; PostgreSQL</p>
-    </div>
-  </footer>
-</template>
+<template><footer class="site-footer"><div><strong>DriveMesh</strong><span>{{ t('Google Drive di perangkat Anda.', 'Google Drive on your devices.') }}</span><nav :aria-label="t('Informasi hukum', 'Legal information')"><NuxtLink to="/privacy">{{ t('Kebijakan Privasi', 'Privacy Policy') }}</NuxtLink><NuxtLink to="/terms">{{ t('Ketentuan Layanan', 'Terms of Service') }}</NuxtLink></nav></div></footer></template>
+<script setup lang="ts">const { t } = useLanguage();</script>

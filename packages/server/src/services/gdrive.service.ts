@@ -1,148 +1,42 @@
-import { google } from 'googleapis';
+import crypto from 'crypto';
+import { google, Auth } from 'googleapis';
 import { config } from '../config';
-import { OAuthTokenModel } from '../models/oauthToken.model';
+import { pool } from '../database/connection';
+import { Drive } from '../models/account.model';
 import { encryptSecret, decryptSecret } from '../utils/vault.util';
-import { formatBytes } from '../utils/formatters.util';
-
+import { makeFolderName } from '../utils/folderName.util';
 export class GoogleDriveService {
-  private createOAuthClient() {
-    return new google.auth.OAuth2(
-      config.googleClientId,
-      config.googleClientSecret,
-      config.googleRedirectUri
-    );
+  private client() { return new google.auth.OAuth2(config.googleClientId, config.googleClientSecret, config.googleRedirectUri); }
+  generateAuthUrl(state: string, challenge: string): string {
+    return this.client().generateAuthUrl({ state, code_challenge: challenge, code_challenge_method: Auth.CodeChallengeMethod.S256,
+      access_type: 'offline', prompt: 'consent', scope: ['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/drive'] });
   }
-
-  generateAuthUrl(): string {
-    const oauth2Client = this.createOAuthClient();
-    return oauth2Client.generateAuthUrl({
-      access_type: 'offline',
-      prompt: 'consent',
-      scope: [
-        'https://www.googleapis.com/auth/userinfo.email',
-        'https://www.googleapis.com/auth/userinfo.profile',
-        'https://www.googleapis.com/auth/drive',
-      ],
-    });
+  async connect(code: string, verifier: string, accountId: string): Promise<Drive> {
+    const client = this.client();
+    const { tokens } = await client.getToken({ code, codeVerifier: verifier });
+    if (!tokens.id_token) throw new Error('Google tidak mengembalikan identitas');
+    const ticket = await client.verifyIdToken({ idToken: tokens.id_token, audience: config.googleClientId });
+    const identity = ticket.getPayload();
+    if (!identity?.sub || !identity.email || !identity.email_verified) throw new Error('Identitas Google tidak terverifikasi');
+    const existing = (await pool.query('SELECT * FROM connected_drives WHERE google_sub=$1', [identity.sub])).rows[0] as Drive | undefined;
+    if (existing && existing.account_id !== accountId) throw new Error('Akun Google ini sudah terhubung ke akun DriveMesh lain');
+    if (!tokens.refresh_token && !existing) throw new Error('Google tidak mengembalikan izin akses offline');
+    const encrypted = tokens.refresh_token ? encryptSecret(tokens.refresh_token) : { cipherText: existing!.refresh_token_enc, iv: existing!.iv, authTag: existing!.auth_tag };
+    const id = crypto.randomUUID();
+    const current = await pool.query('SELECT folder_name FROM connected_drives WHERE account_id=$1', [accountId]);
+    const folderName = makeFolderName(identity.name, identity.email, current.rows.map(row => row.folder_name));
+    const result = await pool.query(`INSERT INTO connected_drives (id,account_id,google_sub,email,display_name,folder_name,refresh_token_enc,iv,auth_tag)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+      ON CONFLICT (google_sub) DO UPDATE SET email=EXCLUDED.email,display_name=EXCLUDED.display_name,
+        refresh_token_enc=EXCLUDED.refresh_token_enc,iv=EXCLUDED.iv,auth_tag=EXCLUDED.auth_tag
+      WHERE connected_drives.account_id=EXCLUDED.account_id RETURNING *`,
+      [id, accountId, identity.sub, identity.email, identity.name || null, folderName, encrypted.cipherText, encrypted.iv, encrypted.authTag]);
+    if (!result.rowCount) throw new Error('Akun Google ini sudah terhubung ke akun DriveMesh lain');
+    return result.rows[0];
   }
-
-  async handleCallback(code: string): Promise<{ email: string; name: string }> {
-    const oauth2Client = this.createOAuthClient();
-    const { tokens } = await oauth2Client.getToken(code);
-    oauth2Client.setCredentials(tokens);
-
-    const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client });
-    const userInfo = await oauth2.userinfo.get();
-
-    const refreshToken = tokens.refresh_token;
-    if (!refreshToken) {
-      const existing = await OAuthTokenModel.findByProvider('google');
-      if (!existing) {
-        throw new Error('Google did not return a refresh_token. Silakan coba lagi.');
-      }
-    } else {
-      const encrypted = encryptSecret(refreshToken);
-      await OAuthTokenModel.upsert({
-        provider: 'google',
-        access_token: tokens.access_token || null,
-        refresh_token_enc: encrypted.cipherText,
-        iv: encrypted.iv,
-        auth_tag: encrypted.authTag,
-        expiry_date: tokens.expiry_date || null,
-        user_email: userInfo.data.email || null,
-        user_name: userInfo.data.name || null,
-        user_picture: userInfo.data.picture || null,
-      });
-    }
-
-    return {
-      email: userInfo.data.email || 'unknown',
-      name: userInfo.data.name || 'User',
-    };
-  }
-
-  async getAuthenticatedClient() {
-    const tokenRecord = await OAuthTokenModel.findByProvider('google');
-    if (!tokenRecord) return null;
-
-    const refreshToken = decryptSecret({
-      cipherText: tokenRecord.refresh_token_enc,
-      iv: tokenRecord.iv,
-      authTag: tokenRecord.auth_tag,
-    });
-
-    const oauth2Client = this.createOAuthClient();
-    oauth2Client.setCredentials({
-      refresh_token: refreshToken,
-      access_token: tokenRecord.access_token || undefined,
-      expiry_date: tokenRecord.expiry_date ? Number(tokenRecord.expiry_date) : undefined,
-    });
-
-    oauth2Client.on('tokens', async (newTokens) => {
-      const updatedEnc = newTokens.refresh_token
-        ? encryptSecret(newTokens.refresh_token)
-        : { cipherText: tokenRecord.refresh_token_enc, iv: tokenRecord.iv, authTag: tokenRecord.auth_tag };
-
-      await OAuthTokenModel.upsert({
-        provider: 'google',
-        access_token: newTokens.access_token || tokenRecord.access_token,
-        refresh_token_enc: updatedEnc.cipherText,
-        iv: updatedEnc.iv,
-        auth_tag: updatedEnc.authTag,
-        expiry_date: newTokens.expiry_date || (tokenRecord.expiry_date ? Number(tokenRecord.expiry_date) : null),
-        user_email: tokenRecord.user_email,
-        user_name: tokenRecord.user_name,
-        user_picture: tokenRecord.user_picture,
-      });
-    });
-
-    return oauth2Client;
-  }
-
-  async getStatus() {
-    const tokenRecord = await OAuthTokenModel.findByProvider('google');
-    if (!tokenRecord) {
-      return { connected: false };
-    }
-
-    try {
-      const auth = await this.getAuthenticatedClient();
-      if (!auth) return { connected: false };
-
-      const drive = google.drive({ version: 'v3', auth });
-      const about = await drive.about.get({ fields: 'user,storageQuota' });
-
-      const quota = about.data.storageQuota;
-      const limitBytes = parseInt(quota?.limit || '0', 10);
-      const usageBytes = parseInt(quota?.usage || '0', 10);
-      const usagePercent = limitBytes > 0 ? Math.round((usageBytes / limitBytes) * 100) : 0;
-
-      return {
-        connected: true,
-        email: tokenRecord.user_email || about.data.user?.emailAddress || undefined,
-        name: tokenRecord.user_name || about.data.user?.displayName || undefined,
-        picture: tokenRecord.user_picture || about.data.user?.photoLink || undefined,
-        quota: {
-          limitBytes,
-          usageBytes,
-          usagePercent,
-          limitFormatted: formatBytes(limitBytes),
-          usageFormatted: formatBytes(usageBytes),
-        },
-      };
-    } catch {
-      return {
-        connected: true,
-        email: tokenRecord.user_email || undefined,
-        name: tokenRecord.user_name || undefined,
-        picture: tokenRecord.user_picture || undefined,
-      };
-    }
-  }
-
-  async disconnect(): Promise<void> {
-    await OAuthTokenModel.deleteByProvider('google');
+  async revoke(drive: Drive): Promise<void> {
+    const refresh = decryptSecret({ cipherText: drive.refresh_token_enc, iv: drive.iv, authTag: drive.auth_tag });
+    await this.client().revokeToken(refresh);
   }
 }
-
 export const gdriveService = new GoogleDriveService();

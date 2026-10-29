@@ -1,9 +1,9 @@
 <template>
-  <div class="bg-zinc-900/90 border border-zinc-800 rounded-xl p-5 shadow-sm space-y-4">
+  <div class="workspace-panel bg-zinc-900/90 border border-zinc-800 rounded-xl p-5 shadow-sm space-y-4">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2.5">
         <div class="w-6 h-6 rounded bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-300">
-          🔑
+          02
         </div>
         <div>
           <h2 class="text-sm font-semibold text-zinc-100">2. Kredensial Login Jaringan (SMB)</h2>

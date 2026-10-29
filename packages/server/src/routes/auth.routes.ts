@@ -1,11 +1,14 @@
 import { Router } from 'express';
+import { requireSession } from '../middlewares/session.middleware';
 import { AuthController } from '../controllers/auth.controller';
-
 const router = Router();
-
-router.get('/google/url', AuthController.getAuthUrl);
-router.get('/google/callback', AuthController.handleCallback);
+router.post('/register', AuthController.register);
+router.post('/login', AuthController.login);
 router.get('/status', AuthController.getStatus);
-router.post('/disconnect', AuthController.disconnect);
-
+router.post('/logout', requireSession, AuthController.logout);
+router.get('/google/url', requireSession, AuthController.getAuthUrl);
+router.get('/google/callback', AuthController.handleCallback);
+router.get('/drives', requireSession, AuthController.drives);
+router.post('/drives/:id/mount', requireSession, AuthController.mount);
+router.delete('/drives/:id', requireSession, AuthController.disconnect);
 export default router;

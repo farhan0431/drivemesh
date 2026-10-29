@@ -1,32 +1,4 @@
 <template>
-  <header class="border-b border-zinc-800/80 bg-zinc-950/70 backdrop-blur sticky top-0 z-40">
-    <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white text-base shadow-sm">
-          D
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h1 class="font-semibold text-zinc-100 text-sm tracking-tight">DriveMesh</h1>
-            <span class="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">v1.0</span>
-          </div>
-          <p class="text-xs text-zinc-400 font-mono hidden sm:block">{{ domain }}</p>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <StatusBadge :active="smbActive">SMB 3.1.1</StatusBadge>
-        <StatusBadge :active="true">TLS 1.3</StatusBadge>
-      </div>
-    </div>
-  </header>
+  <header class="site-header"><div class="header-inner"><NuxtLink to="/" class="wordmark" :aria-label="t('Beranda DriveMesh', 'DriveMesh home')"><img class="brand-mark" src="/brand/drivemesh-logo.png" alt="" width="44" height="44" />DriveMesh</NuxtLink><nav :aria-label="t('Navigasi utama', 'Main navigation')"><template v-if="$route.path === '/dashboard'"><NuxtLink to="/dashboard">{{ t('Drive Anda', 'Your drives') }}</NuxtLink></template><template v-else><NuxtLink to="/login">{{ t('Masuk', 'Sign in') }}</NuxtLink><NuxtLink to="/register" class="nav-action">{{ t('Buat akun', 'Sign up') }}</NuxtLink></template><label class="nav-language"><span class="visually-hidden">{{ t('Bahasa', 'Language') }}</span><select :value="language" :aria-label="t('Pilih bahasa', 'Select language')" @change="setLanguage(($event.target as HTMLSelectElement).value as 'id' | 'en')"><option value="id">ID</option><option value="en">EN</option></select></label></nav></div></header>
 </template>
-
-<script setup lang="ts">
-import StatusBadge from '~/components/ui/StatusBadge.vue';
-
-defineProps<{
-  domain: string;
-  smbActive: boolean;
-}>();
-</script>
+<script setup lang="ts">const { language, t, setLanguage } = useLanguage();</script>

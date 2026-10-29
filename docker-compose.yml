@@ -6,10 +6,10 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-drivemesh}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-drivemesh_secure_pass}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set a unique POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB:-drivemesh}
     ports:
-      - "5434:5432"
+      - "127.0.0.1:5434:5432"
     volumes:
       - drivemesh-pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -29,17 +29,25 @@ services:
       - SYS_ADMIN
     devices:
       - /dev/fuse:/dev/fuse
+    security_opt:
+      - apparmor=drivemesh-fuse
     ports:
-      - "5080:5080"
-      - "445:445"
+      - "127.0.0.1:5080:5080"
+      - "${SMB_BIND_ADDRESS:-127.0.0.1}:445:445"
     environment:
       NODE_ENV: production
       PORT: 5080
-      DOMAIN: ${DOMAIN:-drivemesh.farhan-dev.my.id}
-      DATABASE_URL: postgresql://${POSTGRES_USER:-drivemesh}:${POSTGRES_PASSWORD:-drivemesh_secure_pass}@db:5432/${POSTGRES_DB:-drivemesh}
+      LISTEN_HOST: 0.0.0.0
+      TRUST_PROXY: 1
+      DOMAIN: ${DOMAIN:?Set DOMAIN}
+      SMB_HOST: ${SMB_HOST:?Set SMB_HOST}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-drivemesh}:${POSTGRES_PASSWORD:?Set a unique POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-drivemesh}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      MASTER_KEY: ${MASTER_KEY:-drivemesh-enterprise-vault-secure-master-key-32b!}
+      MASTER_KEY: ${MASTER_KEY:?Set a unique MASTER_KEY of at least 32 characters}
+    volumes:
+      - drivemesh-samba:/var/lib/samba
+      - drivemesh-write-cache:/var/lib/drivemesh/cache
     depends_on:
       db:
         condition: service_healthy
@@ -52,13 +60,16 @@ services:
     container_name: drivemesh-client
     restart: unless-stopped
     ports:
-      - "3080:3080"
+      - "127.0.0.1:3080:3080"
     environment:
       NODE_ENV: production
       PORT: 3080
       NITRO_PORT: 3080
+      NUXT_API_PROXY_TARGET: http://server:5080
     depends_on:
       - server
 
 volumes:
   drivemesh-pgdata:
+  drivemesh-samba:
+  drivemesh-write-cache:

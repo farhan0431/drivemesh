@@ -1,16 +1,5 @@
-<template>
-  <NuxtLayout :domain="status.domain" :smb-active="status.smbService">
-    <NuxtPage />
-  </NuxtLayout>
-</template>
-
+<template><NuxtLayout><NuxtPage /></NuxtLayout></template>
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import { useSystemStatus } from '~/composables/useSystemStatus';
-
-const { status, fetchStatus } = useSystemStatus();
-
-onMounted(() => {
-  fetchStatus();
-});
+const { language } = useLanguage();
+useHead({ htmlAttrs: { lang: language } });
 </script>

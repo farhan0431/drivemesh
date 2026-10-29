@@ -1,75 +1,25 @@
 import { ref } from 'vue';
-
-export interface QuotaInfo {
-  limitBytes: number;
-  usageBytes: number;
-  usagePercent: number;
-  limitFormatted: string;
-  usageFormatted: string;
-}
-
-export interface GoogleAuthData {
-  connected: boolean;
-  email?: string;
-  name?: string;
-  picture?: string;
-  quota?: QuotaInfo;
-  mountStatus?: {
-    active: boolean;
-    mountPoint: string;
-    protocol: string;
-  };
-}
-
+export interface AccountStatus { authenticated: boolean; username?: string }
 export function useGoogleAuth() {
-  const authData = ref<GoogleAuthData>({ connected: false });
-  const loading = ref(false);
+  const { t } = useLanguage();
+  const authData = ref<AccountStatus>({ authenticated: false });
+  const loading = ref(true);
   const error = ref<string | null>(null);
-
   const fetchStatus = async () => {
-    loading.value = true;
-    error.value = null;
-    try {
-      const res = await $fetch<{ success: boolean; data: GoogleAuthData }>('/api/auth/status');
-      if (res && res.success) {
-        authData.value = res.data;
-      }
-    } catch (err: unknown) {
-      error.value = err instanceof Error ? err.message : 'Gagal memuat status Google';
-    } finally {
-      loading.value = false;
-    }
+    loading.value = true; error.value = null;
+    try { const res = await $fetch<{ success: boolean; data: AccountStatus }>('/api/auth/status'); authData.value = res.data; }
+    catch { error.value = t('Tidak dapat memuat status akun. Periksa koneksi dan coba lagi.', 'Unable to load account status. Check your connection and try again.'); }
+    finally { loading.value = false; }
   };
-
   const connectGoogle = async () => {
-    try {
-      const res = await $fetch<{ success: boolean; url: string; error?: string }>('/api/auth/google/url');
-      if (res.success && res.url) {
-        window.location.href = res.url;
-      } else if (res.error) {
-        alert(res.error);
-      }
-    } catch (err: unknown) {
-      alert('Gagal memulai otorisasi Google: ' + (err instanceof Error ? err.message : 'Unknown error'));
-    }
+    error.value = null;
+    try { const res = await $fetch<{ url: string }>('/api/auth/google/url'); window.location.assign(res.url); }
+    catch { error.value = t('Tidak dapat membuka Google. Pastikan layanan dan konfigurasi OAuth tersedia.', 'Unable to open Google. Check the service and OAuth configuration.'); }
   };
-
-  const disconnectGoogle = async () => {
-    if (!confirm('Apakah Anda yakin ingin memutuskan akses Google Drive?')) return;
-    try {
-      await $fetch('/api/auth/disconnect', { method: 'POST' });
-      await fetchStatus();
-    } catch (err) {
-      console.error(err);
-    }
+  const logout = async () => {
+    error.value = null;
+    try { await $fetch('/api/auth/logout', { method: 'POST' }); await navigateTo('/login'); }
+    catch { error.value = t('Tidak dapat keluar. Coba lagi.', 'Unable to sign out. Please try again.'); }
   };
-
-  return {
-    authData,
-    loading,
-    error,
-    fetchStatus,
-    connectGoogle,
-    disconnectGoogle,
-  };
+  return { authData, loading, error, fetchStatus, connectGoogle, logout };
 }

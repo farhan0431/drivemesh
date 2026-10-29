@@ -1,0 +1,10 @@
+.git
+.env
+.env.*
+.local-backups
+**/node_modules
+**/.nuxt
+**/.nuxt-verify
+**/.output
+**/dist
+**/.config

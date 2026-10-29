@@ -7,11 +7,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 make g++ \
     && rm -rf /var/lib/apt/lists/*
 
-COPY package.json ./
+COPY package.json package-lock.json ./
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/server/package.json ./packages/server/
+COPY packages/client/package.json ./packages/client/
 
-RUN npm install
+RUN npm ci --workspace=@drivemesh/server --workspace=@drivemesh/shared --include-workspace-root --ignore-scripts
 
 COPY packages/shared/ ./packages/shared/
 COPY packages/server/ ./packages/server/
@@ -25,17 +26,19 @@ FROM node:22-bookworm-slim AS runner
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    rclone fuse3 samba \
+    rclone fuse3 samba ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production
 ENV PORT=5080
+ENV LISTEN_HOST=0.0.0.0
 
-COPY package.json ./
+COPY package.json package-lock.json ./
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/server/package.json ./packages/server/
+COPY packages/client/package.json ./packages/client/
 
-RUN npm install --omit=dev
+RUN npm ci --omit=dev --workspace=@drivemesh/server --workspace=@drivemesh/shared --include-workspace-root --ignore-scripts
 
 COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
 COPY --from=builder /app/packages/server/dist ./packages/server/dist

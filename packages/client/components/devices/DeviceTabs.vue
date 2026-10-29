@@ -1,61 +1,19 @@
 <template>
-  <div class="bg-zinc-900/90 border border-zinc-800 rounded-xl p-5 shadow-sm space-y-4">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-2.5">
-        <div class="w-6 h-6 rounded bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-300">
-          💻
-        </div>
-        <div>
-          <h2 class="text-sm font-semibold text-zinc-100">3. Hubungkan ke Perangkat Anda</h2>
-          <p class="text-xs text-zinc-400">Pilih jenis perangkat yang ingin Anda sambungkan langsung.</p>
-        </div>
-      </div>
+  <section class="device-section"><h2>{{ t('Hubungkan perangkat', 'Connect a device') }}</h2><p>{{ t('Pilih perangkat dan gunakan akun DriveMesh Anda saat diminta.', 'Choose a device and use your DriveMesh account when prompted.') }}</p>
+    <div class="device-tabs" role="tablist" :aria-label="t('Panduan perangkat', 'Device guides')"><button v-for="tab in tabs" :key="tab.id" role="tab" :aria-selected="activeTab === tab.id" :aria-controls="`guide-${tab.id}`" :id="`tab-${tab.id}`" :tabindex="activeTab === tab.id ? 0 : -1" @click="select(tab.id)" @keydown.left.prevent="move(-1)" @keydown.right.prevent="move(1)">{{ tab.label }}</button></div>
+    <div class="device-guide" role="tabpanel" :id="`guide-${activeTab}`" :aria-labelledby="`tab-${activeTab}`">
+      <template v-if="activeTab === 'ios'"><h3>{{ t('iPhone dan iPad', 'iPhone and iPad') }}</h3><ol><li>{{ t('Buka Files, lalu pilih Browse dan Connect to Server.', 'Open Files, then choose Browse and Connect to Server.') }}</li><li>{{ t('Masukkan alamat server di bawah.', 'Enter the server address below.') }}</li><li>{{ t('Pilih Registered User, masukkan akun DriveMesh Anda, lalu pilih folder DriveMesh.', 'Choose Registered User, enter your DriveMesh credentials, then select DriveMesh.') }}</li></ol><CopyBox :text="smbUrl" copy-key="ios-smb" /></template>
+      <template v-else-if="activeTab === 'mac'"><h3>macOS Finder</h3><ol><li>{{ t('Di Finder, pilih Go lalu Connect to Server (⌘K).', 'In Finder, choose Go and then Connect to Server (⌘K).') }}</li><li>{{ t('Masukkan alamat server di bawah.', 'Enter the server address below.') }}</li><li>{{ t('Masuk sebagai Registered User dengan akun DriveMesh Anda, lalu pilih DriveMesh.', 'Sign in as a Registered User with your DriveMesh account, then select DriveMesh.') }}</li></ol><CopyBox :text="smbUrl" copy-key="mac-smb" /></template>
+      <template v-else><h3>Windows Explorer</h3><ol><li>{{ t('Di File Explorer, pilih This PC lalu Map network drive.', 'In File Explorer, select This PC and then Map network drive.') }}</li><li>{{ t('Masukkan alamat folder di bawah dan pilih koneksi dengan kredensial berbeda.', 'Enter the folder address below and select connect using different credentials.') }}</li><li>{{ t(`Masuk dengan username ${username} dan password DriveMesh Anda.`, `Sign in with username ${username} and your DriveMesh password.`) }}</li></ol><CopyBox :text="windowsPath" copy-key="windows-path" /></template>
     </div>
-
-    <!-- Tabs Header -->
-    <div class="flex border-b border-zinc-800">
-      <button
-        v-for="tab in tabs"
-        :key="tab.id"
-        type="button"
-        @click="activeTab = tab.id"
-        class="flex items-center gap-2 px-4 py-2.5 text-xs font-medium border-b-2 transition-colors -mb-px"
-        :class="
-          activeTab === tab.id
-            ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-            : 'border-transparent text-zinc-400 hover:text-zinc-200'
-        "
-      >
-        <span>{{ tab.label }}</span>
-      </button>
-    </div>
-
-    <!-- Tab Content -->
-    <div class="pt-2">
-      <IosGuide v-if="activeTab === 'ios'" :smb-url="smbUrl" />
-      <MacGuide v-else-if="activeTab === 'mac'" :smb-url="smbUrl" />
-      <WindowsGuide v-else-if="activeTab === 'windows'" :windows-path="windowsPath" :username="username" />
-    </div>
-  </div>
+  </section>
 </template>
-
 <script setup lang="ts">
-import { ref } from 'vue';
-import IosGuide from './IosGuide.vue';
-import MacGuide from './MacGuide.vue';
-import WindowsGuide from './WindowsGuide.vue';
-
-defineProps<{
-  smbUrl: string;
-  windowsPath: string;
-  username: string;
-}>();
-
-const tabs = [
-  { id: 'ios', label: '📱 iPhone / iPad Files' },
-  { id: 'mac', label: '🍏 macOS Finder' },
-  { id: 'windows', label: '🪟 Windows Explorer' },
-];
-
+import CopyBox from '~/components/ui/CopyBox.vue';
+const { t } = useLanguage();
+defineProps<{ smbUrl: string; windowsPath: string; username: string }>();
+const tabs = [{ id: 'ios', label: 'iPhone / iPad' }, { id: 'mac', label: 'Mac' }, { id: 'windows', label: 'Windows' }];
 const activeTab = ref('ios');
+function select(id: string) { activeTab.value = id; }
+function move(direction: number) { const i = tabs.findIndex(tab => tab.id === activeTab.value); activeTab.value = tabs[(i + direction + tabs.length) % tabs.length].id; nextTick(() => document.getElementById(`tab-${activeTab.value}`)?.focus()); }
 </script>

@@ -137,3 +137,11 @@ dist
 
 .config/
 *.log
+
+# Local deployment backups and verification builds
+.local-backups/
+**/.nuxt-verify/
+
+# Generated Nuxt output and local design-tool state
+**/.output/
+.hallmark/
