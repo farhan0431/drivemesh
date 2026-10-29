@@ -13,7 +13,7 @@
       </section>
       <aside class="connection-panel" aria-labelledby="connection-title"><h2 id="connection-title">{{ t('Akses perangkat', 'Device access') }}</h2><p>{{ t('Gunakan username dan password yang sama dengan akun DriveMesh Anda.', 'Use the same username and password as your DriveMesh account.') }}</p><template v-if="credentials"><div class="connection-detail"><span>Username</span><strong>{{ credentials.username }}</strong></div><div class="connection-detail"><span>{{ t('Alamat server', 'Server address') }}</span><CopyBox :text="credentials.smbUrl" copy-key="smb" /></div><p class="security-note">{{ t('Gunakan password yang unik dan kuat untuk melindungi akses file Anda.', 'Use a strong, unique password to protect access to your files.') }}</p></template><p v-else-if="credentialsError" class="form-error">{{ credentialsError }}</p><p v-else>{{ t('Memuat alamat…', 'Loading address…') }}</p></aside>
     </div>
-    <DeviceTabs v-if="credentials" :smb-url="credentials.smbUrl" :windows-path="credentials.directWindowsPath" :username="credentials.username" />
+    <DeviceTabs v-if="credentials" :smb-url="credentials.smbUrl" :windows-path="credentials.windowsPath" :username="credentials.username" />
   </div>
 </template>
 <script setup lang="ts">

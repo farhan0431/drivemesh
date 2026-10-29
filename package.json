@@ -2,7 +2,7 @@
   "name": "drivemesh",
   "version": "1.0.0",
   "private": true,
-  "description": "Stateless Streaming Gateway bridging Google Drive to Windows Explorer, macOS Finder, and iPhone Files",
+  "description": "Self-hosted Google Drive gateway for SMB clients",
   "workspaces": [
     "packages/*"
   ],
@@ -17,5 +17,10 @@
   },
   "devDependencies": {
     "typescript": "^5.7.2"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/farhan0431/drivemesh.git"
   }
 }
