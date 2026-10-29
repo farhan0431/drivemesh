@@ -1,0 +1,32 @@
+{
+  "name": "@drivemesh/client-prod",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@babel/parser": "7.29.11",
+    "@vue/compiler-core": "3.5.44",
+    "@vue/compiler-dom": "3.5.44",
+    "@vue/compiler-ssr": "3.5.44",
+    "@vue/devtools-api": "6.6.4",
+    "@vue/reactivity": "3.5.44",
+    "@vue/runtime-core": "3.5.44",
+    "@vue/runtime-dom": "3.5.44",
+    "@vue/server-renderer": "3.5.44",
+    "@vue/shared": "3.5.44",
+    "devalue": "5.9.4",
+    "dijkstrajs": "1.0.3",
+    "entities": "7.0.1",
+    "estree-walker": "2.0.2",
+    "hookable": "6.1.2",
+    "lucide-vue-next": "0.469.0",
+    "pngjs": "5.0.0",
+    "qrcode": "1.5.4",
+    "source-map-js": "1.2.2",
+    "ufo": "1.6.4",
+    "unhead": "2.1.17",
+    "vue": "3.5.44",
+    "vue-bundle-renderer": "2.4.0",
+    "vue-router": "4.6.4"
+  }
+}

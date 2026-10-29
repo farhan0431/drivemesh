@@ -1,0 +1,64 @@
+services:
+  # 1. PostgreSQL Database
+  db:
+    image: postgres:17-alpine
+    container_name: drivemesh-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-drivemesh}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-drivemesh_secure_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-drivemesh}
+    ports:
+      - "5434:5432"
+    volumes:
+      - drivemesh-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-drivemesh}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. Express.js Core Streaming Engine
+  server:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.server
+    container_name: drivemesh-server
+    restart: unless-stopped
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse:/dev/fuse
+    ports:
+      - "5080:5080"
+      - "445:445"
+    environment:
+      NODE_ENV: production
+      PORT: 5080
+      DOMAIN: ${DOMAIN:-drivemesh.farhan-dev.my.id}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-drivemesh}:${POSTGRES_PASSWORD:-drivemesh_secure_pass}@db:5432/${POSTGRES_DB:-drivemesh}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      MASTER_KEY: ${MASTER_KEY:-drivemesh-enterprise-vault-secure-master-key-32b!}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # 3. Nuxt 3 Web Portal
+  client:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.client
+    container_name: drivemesh-client
+    restart: unless-stopped
+    ports:
+      - "3080:3080"
+    environment:
+      NODE_ENV: production
+      PORT: 3080
+      NITRO_PORT: 3080
+    depends_on:
+      - server
+
+volumes:
+  drivemesh-pgdata:
