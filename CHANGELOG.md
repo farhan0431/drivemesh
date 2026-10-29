@@ -4,6 +4,10 @@ Perubahan penting proyek dicatat di sini. Bagian **Unreleased** mencatat perubah
 
 ## Unreleased
 
+Belum ada perubahan yang dicatat.
+
+## 0.0.1 — 2026-10-29
+
 ### Ditambahkan
 
 - Akun DriveMesh dengan sesi web dan login SMB, serta dukungan beberapa Google Drive per akun.
